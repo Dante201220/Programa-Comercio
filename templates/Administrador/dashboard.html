@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="nav-container">
+            <a href="/admin/dashboard" class="logo"> Panel Comercio</a>
+            <div class="nav-links">
+                <span class="user-welcome">Hola, {{ session.get('admin_name', 'Administrador') }} </span>
+                <a href="/" target="_blank" class="btn-view-site"> Ver Tienda</a>
+                <a href="/admin/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Bienvenido al Panel de Gestión</h1>
+            <p>Elegí qué sección querés controlar hoy de tu negocio.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <div class="dash-card">
+                <div class="card-icon"></div>
+                <h3>Categorías</h3>
+                <p>Organizá tus productos. Creá o editá las familias (ej: Remeras, Pantalones, Accesorios).</p>
+                <a href="/admin/categorias" class="btn-dash">Gestionar Categorías</a>
+            </div>
+
+            <div class="dash-card">
+                <div class="card-icon"></div>
+                <h3>Productos (ABM)</h3>
+                <p>Cargá nuevos artículos al sistema, controlá los precios de costo/venta y modificá el stock.</p>
+                <a href="/admin/productos" class="btn-dash">Gestionar Productos</a>
+            </div>
+
+            <!-- CARD HISTORIAL DE VENTAS HABILITADO -->
+            <div class="dash-card">
+                <div class="card-icon"></div>
+                <h3>Historial de Ventas</h3>
+                <p>Revisá la facturación, los pedidos de los clientes y filtrá los movimientos por fechas.</p>
+                <a href="/admin/ventas" class="btn-dash">Ver Historial</a>
+                </div>
+            </div>
+    </main>
+
+</body>
+</html>

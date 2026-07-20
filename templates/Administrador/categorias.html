@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Gestión de Categorías</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="nav-container">
+            <a href="/admin/dashboard" class="logo"> Panel Comercio</a>
+            <div class="nav-links">
+                <a href="/admin/dashboard">← Volver al Dashboard</a>
+                <a href="/admin/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h1> Gestión de Categorías</h1>
+            <p>Creá y administrá las secciones en las que se dividirán tus productos.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Formulario para Crear / Editar -->
+        <div class="crud-card">
+            <h3 id="form-title">Nueva Categoría</h3>
+            <form action="/admin/categorias" method="POST" id="categoryForm">
+                <input type="hidden" name="action" value="create" id="action-input">
+                <input type="hidden" name="id_categoria" id="id_categoria">
+
+                <div class="form-group-inline">
+                    <label for="nombre_categoria">Nombre de la Categoría:</label>
+                    <input type="text" id="nombre_categoria" name="nombre_categoria" placeholder="Ej: Remeras, Accesorios, Herramientas" required>
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">Añadir Categoría</button>
+            </form>
+        </div>
+
+        <!-- Lista de Categorías -->
+        <div class="crud-card" style="margin-top: 2rem;">
+            <h3>Categorías Existentes</h3>
+            
+            {% if not categorias %}
+                <p style="color: #64748b; margin-top: 1rem;">Todavía no creaste ninguna categoría.</p>
+            {% else %}
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre de la Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in categorias %}
+                                <tr>
+                                    <td>#{{ cat.id_categoria }}</td>
+                                    <td class="font-weight-bold">{{ cat.nombre_categoria }}</td>
+                                    <td>
+                                        <!-- Botón Editar -->
+                                        <button 
+                                            data-id="{{ cat.id_categoria }}"
+                                            data-nombre="{{ cat.nombre_categoria|replace("'", "&#39;") }}"
+                                            onclick="editarCategoria(this)"
+                                            style="background:#3b82f6; color:white; border:none; padding:6px 12px; border-radius:4px; margin-right:5px; cursor:pointer;">
+                                            ✏ Editar
+                                        </button>
+                                        
+                                        <!-- Formulario Eliminar -->
+                                        <form action="/admin/categorias" method="POST" style="display:inline;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id_categoria" value="{{ cat.id_categoria }}">
+                                            <button type="submit" 
+                                                    onclick="return confirm('¿Eliminar esta categoría? (No se puede si tiene productos)')"
+                                                    style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                                                    🗑 Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        function editarCategoria(btn) {
+            const id = btn.getAttribute('data-id');
+            const nombre = btn.getAttribute('data-nombre');
+
+            document.getElementById('id_categoria').value = id;
+            document.getElementById('nombre_categoria').value = nombre;
+            document.getElementById('action-input').value = 'edit';
+            document.getElementById('form-title').innerText = 'Editar Categoría';
+            document.getElementById('submit-btn').innerText = 'Guardar Cambios';
+        }
+    </script>
+
+</body>
+</html>

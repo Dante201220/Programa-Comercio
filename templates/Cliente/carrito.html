@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito de Compras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="public-body">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">🛒 Mi Tienda</a>
+            <a href="/" class="btn-cart">Volver al Catálogo</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="cart-header">
+            <h1>Tu Carrito de Compras</h1>
+            <p>Revisá tus productos antes de finalizar la compra.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if productos_carrito %}
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in productos_carrito %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.nombre }}</strong>
+                        </td>
+                        <td>${{ item.precio }}</td>
+                        <td>{{ item.cantidad }}</td>
+                        <td>${{ item.subtotal }}</td>
+                        <td>
+                            <a href="/carrito/remove/{{ item.id }}" class="btn-delete-item">Quitar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="cart-summary">
+                <h2>Total de la Compra: <span>${{ total }}</span></h2>
+                
+                <form action="/carrito/checkout" method="POST" class="checkout-form">
+                    <div class="form-group">
+                        <label for="cliente_nombre">Tu Nombre (Opcional):</label>
+                        <input type="text" id="cliente_nombre" name="cliente_nombre" placeholder="Ej: Dante Dueño" required>
+                    </div>
+                    <div class="checkout-actions">
+                        <a href="/carrito/clear" class="btn-clear">Vaciar Carrito</a>
+                        <button type="submit" class="btn-checkout-confirm">Confirmar y Realizar Compra</button>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <div class="empty-cart-msg">
+                <p>Tu carrito está vacío actualmente. ¡Animate a sumar algún producto!</p>
+                <a href="/" class="btn-primary">Ir a ver el Catálogo</a>
+            </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>

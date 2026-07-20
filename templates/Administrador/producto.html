@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Gestión de Productos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="nav-container">
+            <a href="/admin/dashboard" class="logo"> Panel Comercio</a>
+            <div class="nav-links">
+                <a href="/admin/dashboard">← Volver al Dashboard</a>
+                <a href="/admin/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h1> ABM de Productos</h1>
+            <p>Registrá nuevos artículos, modificá precios y controlá los niveles de stock actual.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="crud-card">
+            <h3 id="form-title">Cargar Nuevo Producto</h3>
+            <form action="/admin/productos" method="POST" id="productForm">
+                
+                <!-- Inputs Ocultos de Control -->
+                <input type="hidden" name="action" value="create" id="action-input">
+                <input type="hidden" name="id_producto" id="id_producto">
+
+                <div class="form-grid-inputs">
+                    <div class="form-group-block">
+                        <label for="nombre">Nombre del Producto:</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Ej: Remera Over Size Negra" required>
+                    </div>
+
+                    <div class="form-group-block">
+                        <label for="id_categoria">Categoría Asignada:</label>
+                        <select id="id_categoria" name="id_categoria" required>
+                            <option value="" disabled selected>-- Seleccioná una categoría --</option>
+                            {% for cat in categorias %}
+                                <option value="{{ cat.id_categoria }}">{{ cat.nombre_categoria }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group-block">
+                        <label for="precio_compra">Precio de Compra ($):</label>
+                        <input type="number" id="precio_compra" name="precio_compra" step="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="form-group-block">
+                        <label for="precio_venta">Precio de Venta ($):</label>
+                        <input type="number" id="precio_venta" name="precio_venta" step="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="form-group-block">
+                        <label for="stock">Stock Inicial:</label>
+                        <input type="number" id="stock" name="stock" value="0" min="0" required>
+                    </div>
+
+                    <div class="form-group-block">
+                        <label for="imagen_url">Nombre del archivo de imagen (Opcional):</label>
+                        <input type="text" id="imagen_url" name="imagen_url" placeholder="Ej: remera.jpg">
+                    </div>
+                </div>
+
+                <div class="form-group-block" style="margin-top: 1rem;">
+                    <label for="descripcion">Descripción Breve:</label>
+                    <textarea id="descripcion" name="descripcion" rows="3" placeholder="Detalles de materiales, talle, etc..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submit-btn" style="margin-top: 1.5rem; width: 100%;">Guardar Producto</button>
+            </form>
+        </div>
+
+        <div class="crud-card" style="margin-top: 2rem;">
+            <h3>Inventario en Base de Datos</h3>
+            
+            {% if not productos %}
+                <p style="color: #64748b; margin-top: 1rem;">No hay productos registrados en el inventario.</p>
+            {% else %}
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>P. Costo</th>
+                                <th>P. Venta</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prod in productos %}
+                                <tr>
+                                    <td>#{{ prod.id_producto }}</td>
+                                    <td class="font-weight-bold">{{ prod.nombre }}</td>
+                                    <td>{{ prod.nombre_categoria or 'Sin categoría' }}</td>
+                                    <td>${{ "{:,.2f}".format(prod.precio_compra) }}</td>
+                                    <td>${{ "{:,.2f}".format(prod.precio_venta) }}</td>
+                                    <td>{{ prod.stock }}</td>
+                                    <td>
+                                        <!-- Eliminar -->
+                                        <form action="/admin/productos" method="POST" style="display:inline-block; margin-right: 8px;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id_producto" value="{{ prod.id_producto }}">
+                                            <button type="submit" 
+                                                    onclick="return confirm('¿Eliminar este producto?')" 
+                                                    style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;">
+                                                    🗑
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Botón Editar -->
+                                        <button 
+                                            data-id="{{ prod.id_producto }}"
+                                            data-nombre="{{ prod.nombre|replace('"', '&quot;')|replace("'", "&#39;") }}"
+                                            data-descripcion="{{ prod.descripcion|default('', true)|replace('"', '&quot;')|replace("'", "&#39;") }}"
+                                            data-preciocompra="{{ prod.precio_compra }}"
+                                            data-precioventa="{{ prod.precio_venta }}"
+                                            data-stock="{{ prod.stock }}"
+                                            data-categoria="{{ prod.id_categoria }}"
+                                            data-imagen="{{ prod.imagen_url|default('', true) }}"
+                                            onclick="editarProducto(this)"
+                                            style="background:#3b82f6; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;">
+                                            ✏ Editar
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+<script>
+    function editarProducto(btn) {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
+        const desc = btn.getAttribute('data-descripcion');
+        const pcompra = btn.getAttribute('data-preciocompra');
+        const pventa = btn.getAttribute('data-precioventa');
+        const stock = btn.getAttribute('data-stock');
+        const cat = btn.getAttribute('data-categoria');
+        const img = btn.getAttribute('data-imagen');
+
+        document.getElementById('id_producto').value = id;
+        document.getElementById('nombre').value = nombre;
+        document.getElementById('descripcion').value = desc || '';
+        document.getElementById('precio_compra').value = pcompra;
+        document.getElementById('precio_venta').value = pventa;
+        document.getElementById('stock').value = stock;
+        
+        if (cat && cat !== 'None') {
+            document.getElementById('id_categoria').value = cat;
+        } else {
+            document.getElementById('id_categoria').selectedIndex = 0;
+        }
+        
+        document.getElementById('imagen_url').value = img || '';
+
+        document.getElementById('form-title').innerText = 'Editar Producto';
+        document.getElementById('submit-btn').innerText = 'Guardar Cambios';
+        document.getElementById('action-input').value = 'edit';
+        
+        // Enfoca el inicio del formulario
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

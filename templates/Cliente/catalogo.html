@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda - Catálogo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">🚀 Mi Tienda</a>
+            <div class="nav-links">
+                <a href="/">Inicio</a>
+                <!-- El botón del carrito ahora está en el menú y tiene su link a /carrito funcionando -->
+                <a href="/carrito" class="btn-cart">
+                    🛒 Carrito ({{ session.get('cart', [])|length }})
+                </a>
+                <a href="/admin/login" class="btn-admin">Panel Dueño</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <!-- Mensajes de Feedback -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="search-section">
+            <form action="/" method="GET" class="search-box">
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Buscar hardware, periféricos, sillas..." autocomplete="off">
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+
+        <!-- Showcase de Categorías Dinámico -->
+        <div class="categories-showcase">
+            {% if not categorias %}
+                <p>No hay categorías configuradas.</p>
+            {% else %}
+                {% for cat in categorias %}
+                    <div class="showcase-card color-{{ (loop.index0 % 3) + 1 }}">
+                        <div class="showcase-content">
+                            <span>{{ cat.descripcion if cat.descripcion else 'Explorar' }}</span>
+                            <h3>{{ cat.nombre_categoria }}</h3>
+                            <a href="/?categoria={{ cat.id_categoria }}" class="showcase-link">Ver Catálogo →</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Cabecera de filtros -->
+        <div class="catalog-header">
+            <h2 class="section-title">Nuestros Productos</h2>
+            {% if request.args.get('search') or request.args.get('categoria') %}
+                <a href="/" class="btn-clear-filters">❌ Limpiar Filtros</a>
+            {% endif %}
+        </div>
+
+        {% if not productos %}
+            <div class="no-products">
+                <p>Por el momento no hay productos que coincidan con tu búsqueda. ¡Volvé más tarde!</p>
+            </div>
+        {% else %}
+            <div class="products-grid">
+                {% for prod in productos %}
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if prod.imagen_url %}
+                                <img src="{{ url_for('static', filename='uploads/' + prod.imagen_url) }}" alt="{{ prod.nombre }}">
+                            {% else %}
+                                <div class="no-image">Sin Foto</div>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ prod.nombre }}</h3>
+                            <p class="description">{{ prod.descripcion if prod.descripcion else 'Sin descripción.' }}</p>
+                            <div class="product-footer">
+                                <span class="price">${{ "{:,.2f}".format(prod.precio_venta) }}</span>
+                                {% if prod.stock > 0 %}
+                                    <span class="stock in-stock">Stock: {{ prod.stock }}</span>
+                                {% else %}
+                                    <span class="stock no-stock">Sin Stock</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Botones de Acción rápidos -->
+                            <div class="product-actions-grid">
+                                <a href="/producto/{{ prod.id_producto }}" class="btn-detail">Detalles</a>
+                                {% if prod.stock > 0 %}
+                                    <a href="{{ url_for('add_to_cart', id=prod.id_producto) }}" class="btn-buy">🛒 Comprar</a>
+                                {% else %}
+                                    <button class="btn-buy" disabled>Agotado</button>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h2>🚀 Mi Tienda</h2>
+                <p>Hardware premium y periféricos de alta gama para entusiastas del gaming y el trabajo profesional.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Navegación</h4>
+                <a href="/">Catálogo</a>
+                <a href="/admin/login">Panel de Control</a>
+            </div>
+            <div class="footer-contact">
+                <h4>Contacto</h4>
+                <p>📍 Av. de los Gamers 1337, Ciudad</p>
+                <p>📞 +54 9 11 1234-5678</p>
+                <p>✉️ soporte@tucomercio.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Mi Tienda. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

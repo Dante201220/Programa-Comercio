@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda - {{ producto.nombre if producto else 'Producto' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"> ComercioGenérico</a>
+            <div class="nav-links">
+                <a href="/">Inicio</a>
+                <a href="#" class="btn-cart">
+                    🛒 Carrito ({{ session.get('cart', [])|length }})
+                </a>
+                <a href="/admin/login" class="btn-admin">Panel Dueño</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <!-- Mensajes de Feedback (Flash) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="back-link-container">
+            <a href="/" class="btn-back">← Volver al catálogo</a>
+        </div>
+
+        {% if not producto %}
+            <div class="error-container">
+                <h2>⚠️ Producto no encontrado</h2>
+                <p>El producto que estás buscando no existe o fue dado de baja.</p>
+                <a href="/" class="btn-detail">Ir al Inicio</a>
+            </div>
+        {% else %}
+            <div class="detail-grid">
+                <div class="detail-image-box">
+                    {% if producto.imagen_url %}
+                        <img src="{{ url_for('static', filename='uploads/' + producto.imagen_url) }}" alt="{{ producto.nombre }}">
+                    {% else %}
+                        <div class="detail-no-image">Sin Foto Disponible</div>
+                    {% endif %}
+                </div>
+
+                <div class="detail-info-box">
+                    <h1 class="detail-title">{{ producto.nombre }}</h1>
+                    
+                    <div class="detail-meta">
+                        <span class="price-large">${{ "{:,.2f}".format(producto.precio_venta) }}</span>
+                        {% if producto.stock > 0 %}
+                            <span class="stock-badge in-stock-badge">Disponible ({{ producto.stock }} unidades)</span>
+                        {% else %}
+                            <span class="stock-badge no-stock-badge">Sin Stock por el momento</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="detail-description">
+                        <h3>Descripción del producto</h3>
+                        <p>{{ producto.descripcion if producto.descripcion else 'Este producto no cuenta con una descripción detallada todavía.' }}</p>
+                    </div>
+                    
+                    <div class="detail-actions">
+                        {% if producto.stock > 0 %}
+                            <form action="{{ url_for('add_to_cart', id=producto.id_producto) }}" method="POST" class="add-to-cart-form">
+                                <div class="quantity-selector">
+                                    <label for="cantidad">Cantidad:</label>
+                                    <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ producto.stock }}" class="input-qty">
+                                </div>
+                                <button type="submit" class="btn-add-to-cart">🛒 Agregar al carrito</button>
+                            </form>
+                        {% else %}
+                            <button class="btn-add-to-cart disabled-btn" disabled>Agotado temporalmente</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

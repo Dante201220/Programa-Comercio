@@ -1,0 +1,33 @@
+# --- PYTHON ---
+# Archivos compilados de Python (no sirven en GitHub)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- ENTORNOS VIRTUALES ---
+# Si creás un entorno virtual para instalar Flask y pyodbc, que no se suba
+venv/
+.venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+
+# --- VS CODE ---
+# Configuraciones de tu editor local (tamaño de letra, carpetas ocultas, etc.)
+.vscode/
+
+# --- FLASK / CONFIGURACIONES ---
+# Para cuando usemos variables de entorno con contraseñas o claves secretas
+.env
+.flaskenv
+instance/
+
+# --- SISTEMA OPERATIVO (WINDOWS) ---
+# Archivos basura que crea Windows automáticamente en las carpetas
+Thumbs.db
+desktop.ini

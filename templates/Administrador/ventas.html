@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas - Administrador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="nav-container">
+            <a href="/admin/dashboard" class="logo">Panel Comercio</a>
+            <div class="nav-links">
+                <a href="/admin/dashboard" class="btn-view-site">Volver al Dashboard</a>
+                <a href="/admin/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Historial de Ventas Realizadas</h1>
+            <p>Monitoreá las transacciones de tu negocio y el detalle de cada pedido.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if ventas %}
+            <div class="sales-list">
+                {% for id_venta, venta in ventas.items() %}
+                <div class="sale-card">
+                    <div class="sale-card-header">
+                        <div>
+                            <h3>Venta #{{ venta.id_venta }}</h3>
+                            <span class="sale-date">📅 {{ venta.fecha.strftime('%d/%m/%Y %H:%M') }}</span>
+                        </div>
+                        <div class="sale-total-badge">
+                            Total: ${{ "%.2f"|format(venta.total) }}
+                        </div>
+                    </div>
+                    <div class="sale-card-body">
+                        <p><strong>Cliente:</strong> {{ venta.cliente if venta.cliente else 'Sin registrar' }}</p>
+                        <h4>Productos de esta venta:</h4>
+                        <ul class="sale-items-list">
+                            {% for det in venta.detalles %}
+                            <li>
+                                <span>{{ det.producto }} (x{{ det.cantidad }})</span>
+                                <span>${{ "%.2f"|format(det.precio) }} c/u</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Aún no se ha realizado ninguna venta en el sistema.</p>
+            </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>
