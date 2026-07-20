@@ -15,7 +15,7 @@ El foco principal de este proyecto no fue solo que funcione bien, sino que esté
 
 ---
 
-## 🔒 Seguridad en serio (Lo lindo del proyecto)
+## 🔒 Seguridad
 
 A la hora de desarrollar el backend, me enfoqué en blindar la aplicación para que sea segura desde el día uno:
 
@@ -62,7 +62,7 @@ python app.py
 ---
 
 ### ¿Cómo lo subís ahora?
-Una vez que crees el archivo y pegues esto, volvés a tu Git Bash y tirás estos tres comandos mágicos para actualizar tu GitHub:
+Una vez que crees el archivo y pegues esto, volvés a tu Git Bash y tirás estos tres comandos para actualizar tu GitHub:
 
 ```bash
 git add README.md
